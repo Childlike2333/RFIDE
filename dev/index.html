@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container" style="width:100%;height:100%"></div>
+
+<!-- 引入base64方法,设置编辑器内容时使用-->
+<script src="../res/base64.js"></script>
+<!-- 根据实际路径进行修改 -->
+<script src="../res/monaco/dev/vs/loader.js"></script>
+<script>
+    // <!-- 根据实际路径进行修改 -->
+    require.config({paths: {'vs': '../res/monaco/dev/vs'}});
+    require(['vs/editor/editor.main'], function () {
+
+        monaco.languages.register({id: "mylang"});
+
+        monaco.editor.defineTheme("myTheme", {
+            //基础
+            base: "vs-dark",
+            //继承
+            inherit: true,
+            //规则
+            rules: [
+                {token: "my-built-in-function", foreground: "ff0000", fontStyle: 'bold'},
+                {token: "my-keyword", foreground: "FFA500"},
+                {token: "my-function", foreground: "008800"},
+            ],
+        });
+
+        monaco.languages.setMonarchTokensProvider("mylang", {
+            //将defaultToken设置为invalid，可以查看尚未标记的内容
+            //defaultToken: "invalid",
+            tokenizer: {
+                root: [
+                    [/[{}()\[\]]/, '@brackets'],
+
+                    [/\b\d*\.\d+([eE][\-+]?\d+)?\b/, "number.float"],
+                    [/\b0[xX][0-9a-fA-F]+\b/, "number.hex"],
+                    [/\b\d+\b/, "number"],
+
+                    [/\b(if|else|return)\b/, "my-keyword"],
+
+                    [/\b(and|or|not)\b/, "my-built-in-function"],
+
+                    [/([a-zA-Z0-9_]+)\s*(\(.*\))/, "@rematch", "@matchfunc"],
+
+                    [/'([^'\\]|\\.)*$/, "string.invalid"],
+                    [/'/, {token: "string.quote", bracket: "@open", next: "@string"}],
+                    {include: "@whitespace"},
+                ],
+                matchfunc: [
+                    [/([a-zA-Z0-9_]+)/, {token: "my-function", next: "@popall"}],
+                ],
+                string: [
+                    [/[^\\'']+/, "string"],
+                    [/\\./, "string.escape.invalid"],
+                    [/'/, {token: "string.quote", bracket: "@close", next: "@pop"}],
+                ],
+                comment: [[/#.*$/, "comment"]],
+                whitespace: [
+                    [/[ \t\r\n]+/, "white"],
+                    [/#.*$/, "comment"],
+                ],
+            },
+            //语言大小写不敏感吗
+            ignoreCase: true,
+        });
+
+        monaco.languages.setLanguageConfiguration("mylang", {
+            brackets: [
+                ["{", "}"],
+                ["[", "]"],
+                ["(", ")"],
+            ],
+            autoClosingPairs: [
+                {open: "{", close: "}"},
+                {open: "[", close: "]"},
+                {open: "(", close: ")"},
+                // { open: '"', close: '"', notIn: ["string"] },
+                {open: "'", close: "'", notIn: ["string", "comment"]},
+                // { open: "`", close: "`", notIn: ["string", "comment"] },
+                // { open: "/**", close: " */", notIn: ["string"] },
+            ],
+        });
+
+        monaco.languages.registerCompletionItemProvider("mylang", {
+            provideCompletionItems: () => {
+                var suggestions = [
+                    {
+                        label: "if",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["if ${0:condition} {", "\t", "}"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "if 声明",
+                    },
+                    {
+                        label: "ifelse",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: [
+                            "if ${0:condition} {",
+                            "\t",
+                            "} else {",
+                            "\t",
+                            "}",
+                        ].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "if-else 声明",
+                    },
+                ]
+                return {suggestions: suggestions};
+            },
+        });
+
+        monaco.languages.registerHoverProvider("mylang", {
+            provideHover: function (document, position, token) {
+                console.log(document.getWordAtPosition(position));
+                if (document.getWordAtPosition(position) != null) {
+                    const word = document.getWordAtPosition(position).word;
+                    if (word == "if") {
+                        return {
+                            contents: [
+                                {value: "**if**"},
+                                {
+                                    value: [
+                                        "这是",
+                                        "if",
+                                        "的一些介绍",
+                                    ].join("\n\n"),
+                                },
+                            ],
+                        };
+                    }
+                }
+            },
+        });
+
+        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+            noSemanticValidation: true,
+            noSyntaxValidation: true
+        });
+        editor = monaco.editor.create(document.getElementById('container'), {
+            value: "",
+            language: 'mylang',  //默认语言
+            theme: 'myTheme',
+            mouseWheelZoom: true,     // 鼠标滚轮缩放
+            wordWrap: "on",           // 自动换行
+            scrollBeyondLastLine: false,
+            minimap: {
+                enabled: false          // 显示右侧小地图
+            }
+        });
+        window.onresize = function () {
+            editor.layout();
+        };
+    });
+</script>
+</body>
+</html>
