@@ -28,138 +28,67 @@
 
         monaco.languages.register({id: "mylang"});
 
+        //黑色主题，后面可以考虑做主题切换功能
         monaco.editor.defineTheme("myTheme", {
             //基础
-            base: "vs-dark",
+            base: "vs",
             //继承
             inherit: true,
             //规则
             rules: [
-                {token: "my-built-in-function", foreground: "ff0000", fontStyle: 'bold'},
-                {token: "my-keyword", foreground: "FFA500"},
-                {token: "my-function", foreground: "008800"},
+                {token: 'custom-info', foreground: '808080'},
+                {token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold'},
+                {token: 'custom-warning', foreground: 'FFA500'},
             ],
         });
 
         monaco.languages.setMonarchTokensProvider("mylang", {
             //将defaultToken设置为invalid，可以查看尚未标记的内容
             //defaultToken: "invalid",
+
             tokenizer: {
                 root: [
-                    [/[{}()\[\]]/, '@brackets'],
-
-                    [/\b\d*\.\d+([eE][\-+]?\d+)?\b/, "number.float"],
-                    [/\b0[xX][0-9a-fA-F]+\b/, "number.hex"],
-                    [/\b\d+\b/, "number"],
-
-                    [/\b(if|else|return)\b/, "my-keyword"],
-
-                    [/\b(and|or|not)\b/, "my-built-in-function"],
-
-                    [/([a-zA-Z0-9_]+)\s*(\(.*\))/, "@rematch", "@matchfunc"],
-
-                    [/'([^'\\]|\\.)*$/, "string.invalid"],
-                    [/'/, {token: "string.quote", bracket: "@open", next: "@string"}],
-                    {include: "@whitespace"},
-                ],
-                matchfunc: [
-                    [/([a-zA-Z0-9_]+)/, {token: "my-function", next: "@popall"}],
-                ],
-                string: [
-                    [/[^\\'']+/, "string"],
-                    [/\\./, "string.escape.invalid"],
-                    [/'/, {token: "string.quote", bracket: "@close", next: "@pop"}],
-                ],
-                comment: [[/#.*$/, "comment"]],
-                whitespace: [
-                    [/[ \t\r\n]+/, "white"],
-                    [/#.*$/, "comment"],
-                ],
+                    [/^switch Connection.*/, "custom-error"],
+                    [/^info/, {token: "custom-info"}],
+                    [/^warning/, {token: "custom-warning"}]
+                ]
             },
             //语言大小写不敏感吗
             ignoreCase: true,
         });
 
-        monaco.languages.setLanguageConfiguration("mylang", {
-            brackets: [
-                ["{", "}"],
-                ["[", "]"],
-                ["(", ")"],
-            ],
-            autoClosingPairs: [
-                {open: "{", close: "}"},
-                {open: "[", close: "]"},
-                {open: "(", close: ")"},
-                // { open: '"', close: '"', notIn: ["string"] },
-                {open: "'", close: "'", notIn: ["string", "comment"]},
-                // { open: "`", close: "`", notIn: ["string", "comment"] },
-                // { open: "/**", close: " */", notIn: ["string"] },
-            ],
-        });
 
+
+
+        // 自动补全时的介绍,关键字库
         monaco.languages.registerCompletionItemProvider("mylang", {
             provideCompletionItems: () => {
-                var suggestions = [
-                    {
-                        label: "if",
+                // var suggestions = monaco.languages.CompletionList ;
+                var suggestions = [] ;
+				// 必须清除range，不然 .号后面东西都提示不了
+				// for (let i = 0; i < suggestions.length; i++) {
+				// 	const v = suggestions[i];
+				// 	delete v.range;
+				// }
+                suggestions.push({
+                        // 关键字输入补全，回车补全，补全后加四个空格
+                        label: "Switch Connection",
                         kind: monaco.languages.CompletionItemKind.Snippet,
-                        insertText: ["if ${0:condition} {", "\t", "}"].join("\n"),
+                        insertText: ["Switch Connection    "].join("\n"),
                         insertTextRules:
                         monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                        detail: "if 声明",
-                    },
-                    {
-                        label: "ifelse",
-                        kind: monaco.languages.CompletionItemKind.Snippet,
-                        insertText: [
-                            "if ${0:condition} {",
-                            "\t",
-                            "} else {",
-                            "\t",
-                            "}",
-                        ].join("\n"),
-                        insertTextRules:
-                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                        detail: "if-else 声明",
-                    },
-                ]
+                        detail: "testif 声明",
+      })
                 return {suggestions: suggestions};
             },
         });
 
-        monaco.languages.registerHoverProvider("mylang", {
-            provideHover: function (document, position, token) {
-                console.log(document.getWordAtPosition(position));
-                if (document.getWordAtPosition(position) != null) {
-                    const word = document.getWordAtPosition(position).word;
-                    if (word == "if") {
-                        return {
-                            contents: [
-                                {value: "**if**"},
-                                {
-                                    value: [
-                                        "这是",
-                                        "if",
-                                        "的一些介绍",
-                                    ].join("\n\n"),
-                                },
-                            ],
-                        };
-                    }
-                }
-            },
-        });
-
-        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: true,
-            noSyntaxValidation: true
-        });
         editor = monaco.editor.create(document.getElementById('container'), {
             value: "",
             language: 'mylang',  //默认语言
             theme: 'myTheme',
             mouseWheelZoom: true,     // 鼠标滚轮缩放
-            wordWrap: "on",           // 自动换行
+            // wordWrap: "on",           // 自动换行
             scrollBeyondLastLine: false,
             minimap: {
                 enabled: false          // 显示右侧小地图
