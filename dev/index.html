@@ -39,6 +39,9 @@
                 {token: 'custom-info', foreground: '808080'},
                 {token: 'custom-error', foreground: 'ff0000', fontStyle: 'bold'},
                 {token: 'custom-warning', foreground: 'FFA500'},
+
+                {token: 'headers', foreground: 'FF0000'},
+                {token: 'brackets', foreground: 'C71585'},
             ],
         });
 
@@ -50,7 +53,10 @@
                 root: [
                     [/^switch Connection.*/, "custom-error"],
                     [/^info/, {token: "custom-info"}],
-                    [/^warning/, {token: "custom-warning"}]
+                    [/^warning/, {token: "custom-warning"}],
+
+                    [/^\*\*\*.*\*\* \*/, {token: "headers"}],
+                    [/^\[(Arguments|Return|Documentation|Setup|Tags|Teardown|Template|Timeout)\]/, {token: "brackets"}],
                 ]
             },
             //语言大小写不敏感吗
@@ -58,31 +64,119 @@
         });
 
 
-
-
         // 自动补全时的介绍,关键字库
         monaco.languages.registerCompletionItemProvider("mylang", {
             provideCompletionItems: () => {
-                // var suggestions = monaco.languages.CompletionList ;
-                var suggestions = [] ;
-				// 必须清除range，不然 .号后面东西都提示不了
-				// for (let i = 0; i < suggestions.length; i++) {
-				// 	const v = suggestions[i];
-				// 	delete v.range;
-				// }
-                suggestions.push({
-                        // 关键字输入补全，回车补全，补全后加四个空格
-                        label: "Switch Connection",
+                var suggestions = [
+                    {
+                        label: "*** Comments ***",
                         kind: monaco.languages.CompletionItemKind.Snippet,
-                        insertText: ["Switch Connection    "].join("\n"),
+                        insertText: ["*** Comments ***\n"].join("\n"),
                         insertTextRules:
                         monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                        detail: "testif 声明",
-      })
+                        detail: "*** Comments ***",
+                    },
+                    {
+                        label: "*** Keywords ***",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["*** Keywords ***\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "*** Keywords ***",
+                    },
+                    {
+                        label: "*** Settings ***",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["*** Settings ***\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "*** Settings ***",
+                    },
+                    {
+                        label: "*** Tasks ***",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["*** Tasks ***\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "*** Tasks ***",
+                    },
+                    {
+                        label: "*** Test Cases ***",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["*** Test Cases ***\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "*** Test Cases ***",
+                    },
+                    {
+                        label: "*** Variables ***",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["*** Variables ***\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "*** Variables ***",
+                    },
+                    {
+                        label: "[Return]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Return]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Return]",
+                    },
+                    {
+                        label: "[Documentation]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Documentation]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Documentation]",
+                    },
+                    {
+                        label: "[Setup]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Setup]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Setup]",
+                    },
+                    {
+                        label: "[Tags]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Tags]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Tags]",
+                    },
+                    {
+                        label: "[Teardown]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Teardown]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Teardown]",
+                    },
+                    {
+                        label: "[Template]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Template]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Template]",
+                    },
+                    {
+                        label: "[Timeout]",
+                        kind: monaco.languages.CompletionItemKind.Snippet,
+                        insertText: ["[Timeout]\n"].join("\n"),
+                        insertTextRules:
+                        monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                        detail: "[Timeout]",
+                    },
+                ];
+
                 return {suggestions: suggestions};
             },
         });
-
         editor = monaco.editor.create(document.getElementById('container'), {
             value: "",
             language: 'mylang',  //默认语言
